@@ -1,6 +1,5 @@
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
 const client = require('./database.js');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -13,10 +12,6 @@ if (!JWT_SECRET) throw new Error('JWT_SECRET environment variable is required');
 
 app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:3000' }));
 app.use(express.json());
-
-// --- 靜態檔案服務（本地開發用，生產環境由 Render Static 提供）---
-const frontendBuildPath = path.join(__dirname, '../frontend/build');
-app.use(express.static(frontendBuildPath));
 
 // --- 中介軟體 (Middleware) ---
 
@@ -334,11 +329,6 @@ app.get('/api/classrooms/:id/bookings', authenticateToken, async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
-});
-
-// --- 兜底路由（本地開發用）---
-app.get('*', (req, res) => {
-    res.sendFile(path.join(frontendBuildPath, 'index.html'));
 });
 
 // --- 啟動伺服器 ---
