@@ -30,12 +30,8 @@ const getUser = () => {
     }
 };
 
-// 受保護的路由，僅限管理員訪問
-const AdminRoute = ({ children }) => {
-    const user = getUser();
-    if (user && user.role === 'admin') {
-        return children;
-    }
+const AdminRoute = ({ user, children }) => {
+    if (user?.role === 'admin') return children;
     return <Navigate to="/" />;
 };
 
@@ -67,10 +63,10 @@ function App() {
                     <Routes>
                         <Route path="/login" element={!user ? <LoginPage onLogin={handleLogin} /> : <Navigate to="/" />} />
                         <Route path="/" element={user ? <DashboardPage user={user} /> : <Navigate to="/login" />} />
-                        <Route 
-                            path="/management" 
+                        <Route
+                            path="/management"
                             element={
-                                <AdminRoute>
+                                <AdminRoute user={user}>
                                     <ManagementPage />
                                 </AdminRoute>
                             }

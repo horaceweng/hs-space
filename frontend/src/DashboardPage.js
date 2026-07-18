@@ -4,11 +4,12 @@ import BookingGrid from './BookingGrid';
 import ClassroomCalendar from './ClassroomCalendar';
 
 function DashboardPage({ user }) {
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]); // 預設為今天
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [classrooms, setClassrooms] = useState([]);
   const [timeslots, setTimeslots] = useState([]);
   const [bookings, setBookings] = useState([]);
-  const [calendarClassroom, setCalendarClassroom] = useState(null); // 控制月曆顯示的教室
+  const [calendarClassroom, setCalendarClassroom] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   // 使用 useCallback 包裹 fetchBookings，避免在 BookingGrid 中引起不必要的重新渲染
   const fetchBookings = useCallback(async () => {
@@ -21,25 +22,19 @@ function DashboardPage({ user }) {
     }
   }, [date]); // 依賴 date，當 date 改變時，這個函式會更新
 
-  // 初次載入時，獲取教室和時段資訊
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        const classroomsRes = await getClassrooms();
+        const [classroomsRes, timeslotsRes] = await Promise.all([getClassrooms(), getTimeSlots()]);
         setClassrooms(classroomsRes.data.classrooms);
-        const timeslotsRes = await getTimeSlots();
-        // 依 start_time 排序
-        const sortedTimeslots = [...timeslotsRes.data.timeslots].sort((a, b) => {
-          return a.start_time.localeCompare(b.start_time);
-        });
-        // 直接用 slot.name 作為 displayName
-        const timeslotsWithDisplay = sortedTimeslots.map(slot => ({
-          ...slot,
-          displayName: slot.name
-        }));
-        setTimeslots(timeslotsWithDisplay);
+        const sortedTimeslots = [...timeslotsRes.data.timeslots].sort((a, b) =>
+          a.start_time.localeCompare(b.start_time)
+        );
+        setTimeslots(sortedTimeslots.map(slot => ({ ...slot, displayName: slot.name })));
       } catch (error) {
         console.error("獲取初始資料失敗:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchInitialData();
@@ -82,6 +77,8 @@ function DashboardPage({ user }) {
   const handleBackFromCalendar = () => {
     setCalendarClassroom(null);
   };
+
+  if (isLoading) return <p style={{ padding: '2rem', textAlign: 'center' }}>載入中...</p>;
 
   return (
     <div>
