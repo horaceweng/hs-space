@@ -13,15 +13,31 @@ const migrationsPath = path.join(__dirname, 'migrations');
 
 async function runMigrations() {
     console.log('正在檢查並執行資料庫遷移...');
+
+    await client.execute(`
+        CREATE TABLE IF NOT EXISTS _migrations (
+            filename TEXT PRIMARY KEY,
+            applied_at TEXT DEFAULT (datetime('now'))
+        )
+    `);
+
+    const { rows: applied } = await client.execute('SELECT filename FROM _migrations');
+    const appliedSet = new Set(applied.map(r => r.filename));
+
     const files = fs.readdirSync(migrationsPath);
     const sqlFiles = files.filter(f => f.endsWith('.sql')).sort();
 
     for (const file of sqlFiles) {
+        if (appliedSet.has(file)) {
+            console.log(`遷移檔案 ${file} 已套用，跳過。`);
+            continue;
+        }
         const sql = fs.readFileSync(path.join(migrationsPath, file), 'utf8');
         const statements = sql.split(';').map(s => s.trim()).filter(Boolean);
         for (const statement of statements) {
             await client.execute(statement);
         }
+        await client.execute({ sql: 'INSERT INTO _migrations (filename) VALUES (?)', args: [file] });
         console.log(`遷移檔案 ${file} 已成功執行。`);
     }
     console.log('所有遷移已執行完畢。');
