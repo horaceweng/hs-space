@@ -1,7 +1,6 @@
 import axios from 'axios';
 
-// 我們的後端 API 伺服器運行的網址
-const API_URL = '/api'; // API URL is now relative
+const API_URL = process.env.REACT_APP_API_URL || '/api';
 
 const api = axios.create({
   baseURL: API_URL,
