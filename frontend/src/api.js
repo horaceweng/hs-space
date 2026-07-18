@@ -6,9 +6,6 @@ const api = axios.create({
   baseURL: API_URL,
 });
 
-// *** 關鍵：設定請求攔截器 (Request Interceptor) ***
-// 這會在每一次請求發送前，自動檢查 localStorage 中是否有 token
-// 如果有，就把它加到請求的 Header 中
 api.interceptors.request.use(
   config => {
     const token = localStorage.getItem('token');
@@ -17,7 +14,16 @@ api.interceptors.request.use(
     }
     return config;
   },
+  error => Promise.reject(error)
+);
+
+api.interceptors.response.use(
+  response => response,
   error => {
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    }
     return Promise.reject(error);
   }
 );
