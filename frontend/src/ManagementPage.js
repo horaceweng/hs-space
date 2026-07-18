@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import * as api from './api';
 
+const DEFAULT_CLASSROOM_COUNT = 6;
+const DEFAULT_TIMESLOT_COUNT = 6;
+
 // --- Main Management Component ---
 const ManagementPage = () => {
     return (
@@ -140,7 +143,7 @@ const ClassroomManagement = () => {
                 <thead><tr><th>ID</th><th>名稱</th><th>操作</th></tr></thead>
                 <tbody>
                     {classrooms.map(c => (
-                        <tr key={c.id}><td>{c.id}</td><td>{c.name}</td><td>{c.id > 6 ? <button onClick={() => handleDelete(c.id)} className="btn btn-danger btn-sm">刪除</button> : '預設'}</td></tr>
+                        <tr key={c.id}><td>{c.id}</td><td>{c.name}</td><td>{c.id > DEFAULT_CLASSROOM_COUNT ? <button onClick={() => handleDelete(c.id)} className="btn btn-danger btn-sm">刪除</button> : '預設'}</td></tr>
                     ))}
                 </tbody>
             </table>
@@ -207,7 +210,7 @@ const TimeslotManagement = () => {
                 <thead><tr><th>ID</th><th>名稱</th><th>開始時間</th><th>結束時間</th><th>操作</th></tr></thead>
                 <tbody>
                     {timeslots.map(t => (
-                        <tr key={t.id}><td>{t.id}</td><td>{t.name}</td><td>{t.start_time}</td><td>{t.end_time}</td><td>{t.id > 6 ? <button onClick={() => handleDelete(t.id)} className="btn btn-danger btn-sm">刪除</button> : '預設'}</td></tr>
+                        <tr key={t.id}><td>{t.id}</td><td>{t.name}</td><td>{t.start_time}</td><td>{t.end_time}</td><td>{t.id > DEFAULT_TIMESLOT_COUNT ? <button onClick={() => handleDelete(t.id)} className="btn btn-danger btn-sm">刪除</button> : '預設'}</td></tr>
                     ))}
                 </tbody>
             </table>
