@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const rateLimit = require('express-rate-limit');
 const client = require('./database.js');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -10,8 +11,19 @@ const PORT = process.env.PORT || 5005;
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) throw new Error('JWT_SECRET environment variable is required');
 
-app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:3000' }));
+const allowedOrigins = process.env.FRONTEND_URL
+    ? process.env.FRONTEND_URL.split(',').map(o => o.trim())
+    : ['http://localhost:3000'];
+app.use(cors({ origin: allowedOrigins }));
 app.use(express.json());
+
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 分鐘
+    max: 10,
+    message: { error: '登入嘗試次數過多，請 15 分鐘後再試。' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
 
 // --- 中介軟體 (Middleware) ---
 
@@ -36,7 +48,7 @@ const authorizeAdmin = (req, res, next) => {
 };
 
 // --- 登入 API ---
-app.post('/api/auth/login', async (req, res) => {
+app.post('/api/auth/login', loginLimiter, async (req, res) => {
     const { username, password } = req.body;
     if (!username || !password) return res.status(400).json({ error: "請提供使用者名稱和密碼" });
 
