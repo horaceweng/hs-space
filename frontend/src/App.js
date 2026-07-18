@@ -7,25 +7,19 @@ import DashboardPage from './DashboardPage';
 import ManagementPage from './ManagementPage';
 import './App.css';
 
-// 獲取並解碼 token，並檢查是否過期
 const getUser = () => {
     const token = localStorage.getItem('token');
     if (!token) return null;
     try {
         const decodedToken = jwtDecode(token);
-        const currentTime = Date.now() / 1000; // 當前時間 (秒)
-
-        // 檢查 token 是否過期
+        const currentTime = Date.now() / 1000; // seconds
         if (decodedToken.exp < currentTime) {
-            console.warn('Token 已過期，自動登出。');
             localStorage.removeItem('token');
             return null;
         }
-
         return decodedToken;
     } catch (e) {
-        console.error('無效的 Token 或解碼失敗:', e);
-        localStorage.removeItem('token'); // 清除無效的 token
+        localStorage.removeItem('token');
         return null;
     }
 };

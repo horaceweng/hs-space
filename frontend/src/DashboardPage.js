@@ -49,7 +49,7 @@ function DashboardPage({ user }) {
     try {
       await createBooking(bookingData);
       alert('預約成功！');
-      fetchBookings(); // 成功後重新整理預約列表
+      fetchBookings();
     } catch (error) {
       console.error("預約失敗:", error);
       alert(error.response?.data?.error || '預約失敗，該時段可能已被預約。');
@@ -57,12 +57,10 @@ function DashboardPage({ user }) {
   };
 
   const handleCancelBooking = async (bookingId, deleteAllRecurrences) => {
-    // The confirmation logic is now handled in BookingGrid.js
-    // This function now directly proceeds with the deletion.
     try {
       await deleteBooking(bookingId, deleteAllRecurrences);
       alert('取消成功！');
-      fetchBookings(); // Refresh the booking list upon success
+      fetchBookings();
     } catch (error) {
       console.error("取消失敗:", error);
       alert(error.response?.data?.error || '取消預約失敗。');
@@ -73,7 +71,6 @@ function DashboardPage({ user }) {
     setCalendarClassroom(classroom);
   };
 
-  // 返回主頁
   const handleBackFromCalendar = () => {
     setCalendarClassroom(null);
   };
