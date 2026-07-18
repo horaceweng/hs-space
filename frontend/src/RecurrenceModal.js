@@ -115,13 +115,18 @@ function RecurrenceModal({ show, onClose, onSubmit, bookingData }) {
 
                 {recurrenceType !== 'single' && (
                     <div className="date-picker-container">
-                        <label htmlFor="end-date">重複至:</label>
-                        <input 
-                            type="date" 
+                        <label htmlFor="end-date">重複至（最多一年）:</label>
+                        <input
+                            type="date"
                             id="end-date"
                             value={endDate}
                             onChange={(e) => setEndDate(e.target.value)}
                             min={bookingData.bookingDate}
+                            max={(() => {
+                                const d = new Date(bookingData.bookingDate);
+                                d.setFullYear(d.getFullYear() + 1);
+                                return d.toISOString().split('T')[0];
+                            })()}
                         />
                     </div>
                 )}
