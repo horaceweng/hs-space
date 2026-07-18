@@ -1,18 +1,53 @@
 import React, { useState } from 'react';
 import RecurrenceModal from './RecurrenceModal';
 
+function CancelConfirmModal({ booking, onConfirm, onClose }) {
+  if (!booking) return null;
+  return (
+    <div className="modal-overlay">
+      <div className="modal-content">
+        <h2>取消預約</h2>
+        {booking.recurrence_id ? (
+          <>
+            <p>此預約為重複預約系列的一部分，請選擇取消範圍：</p>
+            <div className="modal-actions">
+              <button onClick={onClose} className="button-secondary">返回</button>
+              <button onClick={() => onConfirm(false)} className="button-primary" style={{ backgroundColor: '#f39c12' }}>
+                只取消此筆
+              </button>
+              <button onClick={() => onConfirm(true)} className="button-primary" style={{ backgroundColor: '#e74c3c' }}>
+                取消整個系列
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <p>確定要取消這個預約嗎？</p>
+            <div className="modal-actions">
+              <button onClick={onClose} className="button-secondary">返回</button>
+              <button onClick={() => onConfirm(false)} className="button-primary" style={{ backgroundColor: '#e74c3c' }}>
+                確認取消
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function BookingGrid({ classrooms, timeslots, bookings, selectedDate, onCreateBooking, onCancelBooking, user, onClassroomNameClick }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentBookingData, setCurrentBookingData] = useState(null);
+  const [cancelTarget, setCancelTarget] = useState(null);
 
   const handleBookClick = (classroom, timeslot) => {
     setCurrentBookingData({
       classroomId: classroom.id,
       timeslotId: timeslot.id,
       bookingDate: selectedDate,
-      // For display in modal
       classroomName: classroom.name,
-  timeslotName: `${timeslot.displayName || timeslot.name} (${timeslot.start_time} - ${timeslot.end_time})`
+      timeslotName: `${timeslot.displayName || timeslot.name} (${timeslot.start_time} - ${timeslot.end_time})`
     });
     setIsModalOpen(true);
   };
@@ -29,27 +64,26 @@ function BookingGrid({ classrooms, timeslots, bookings, selectedDate, onCreateBo
   };
 
   const handleCancelClick = (booking) => {
-    if (booking.recurrence_id) {
-      const confirmDeleteSeries = window.confirm(
-        '這是一個重複預約。您想要刪除整個系列的預約，還是只刪除這一個？\n點擊「確定」刪除整個系列，點擊「取消」只刪除此單筆預約。'
-      );
-      // The user's choice (true for series, false for single) is passed to onCancelBooking
-      onCancelBooking(booking.id, confirmDeleteSeries);
-    } else {
-      // For non-recurring bookings, always ask for confirmation
-      if (window.confirm('確定要取消這個預約嗎？')) {
-        onCancelBooking(booking.id, false);
-      }
-    }
+    setCancelTarget(booking);
+  };
+
+  const handleCancelConfirm = (deleteAll) => {
+    onCancelBooking(cancelTarget.id, deleteAll);
+    setCancelTarget(null);
   };
 
   return (
     <>
-      <RecurrenceModal 
+      <RecurrenceModal
         show={isModalOpen}
         onClose={handleModalClose}
         onSubmit={handleModalSubmit}
         bookingData={currentBookingData}
+      />
+      <CancelConfirmModal
+        booking={cancelTarget}
+        onConfirm={handleCancelConfirm}
+        onClose={() => setCancelTarget(null)}
       />
       <div className="booking-grid-container">
         <table>
@@ -87,7 +121,7 @@ function BookingGrid({ classrooms, timeslots, bookings, selectedDate, onCreateBo
                           <p><strong>年級:</strong> {booking.grade}</p>
                           <p><strong>事由:</strong> {booking.purpose}</p>
                           {booking.recurrence_rule && <span className="recurrence-badge">重複</span>}
-                          {user?.role === 'admin' && 
+                          {user?.role === 'admin' &&
                             <button onClick={() => handleCancelClick(booking)} className="cancel-button">
                               取消
                             </button>
@@ -95,7 +129,7 @@ function BookingGrid({ classrooms, timeslots, bookings, selectedDate, onCreateBo
                         </div>
                       ) : (
                         <div className="booking-cell available">
-                          {user?.role === 'admin' && 
+                          {user?.role === 'admin' &&
                             <button onClick={() => handleBookClick(room, slot)}>
                               登記
                             </button>
