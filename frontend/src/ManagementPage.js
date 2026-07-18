@@ -91,8 +91,12 @@ const ClassroomManagement = () => {
     const [name, setName] = useState('');
 
     const fetchClassrooms = async () => {
-        const res = await api.getClassrooms();
-        setClassrooms(res.data.classrooms);
+        try {
+            const res = await api.getClassrooms();
+            setClassrooms(res.data.classrooms);
+        } catch (error) {
+            alert('無法獲取教室列表: ' + (error.response?.data?.error || error.message));
+        }
     };
 
     useEffect(() => {
@@ -152,8 +156,12 @@ const TimeslotManagement = () => {
     const [endTime, setEndTime] = useState('09:00');
 
     const fetchTimeslots = async () => {
-        const res = await api.getTimeSlots();
-        setTimeslots(res.data.timeslots);
+        try {
+            const res = await api.getTimeSlots();
+            setTimeslots(res.data.timeslots);
+        } catch (error) {
+            alert('無法獲取時段列表: ' + (error.response?.data?.error || error.message));
+        }
     };
 
     useEffect(() => {
