@@ -9,7 +9,7 @@ function formatDate(year, month, day) {
   return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 }
 
-const ClassroomCalendar = ({ classroom, onBack }) => {
+const ClassroomCalendar = ({ classroom, timeslots = [], onBack }) => {
   const today = new Date();
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth()); // 0-based
@@ -96,7 +96,7 @@ const ClassroomCalendar = ({ classroom, onBack }) => {
                           // 取得 displayName
                           let displayName = '';
                           if (b.timeslot_id) {
-                            const timeslot = (window.timeslotsForCalendar || []).find(ts => ts.id === b.timeslot_id);
+                            const timeslot = timeslots.find(ts => ts.id === b.timeslot_id);
                             displayName = timeslot ? timeslot.displayName || timeslot.name : `時段${b.timeslot_id}`;
                           }
                           return (

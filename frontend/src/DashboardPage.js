@@ -74,10 +74,7 @@ function DashboardPage({ user }) {
     }
   };
   
-  // 點擊教室名稱時切換到月曆檢視
   const handleClassroomNameClick = (classroom) => {
-    // 提供給 ClassroomCalendar 用於顯示 displayName
-    window.timeslotsForCalendar = timeslots;
     setCalendarClassroom(classroom);
   };
 
@@ -89,7 +86,7 @@ function DashboardPage({ user }) {
   return (
     <div>
       {calendarClassroom ? (
-        <ClassroomCalendar classroom={calendarClassroom} onBack={handleBackFromCalendar} />
+        <ClassroomCalendar classroom={calendarClassroom} timeslots={timeslots} onBack={handleBackFromCalendar} />
       ) : (
         <>
           <div className="controls">
